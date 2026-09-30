@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F6F3EC">
+<title>Ұстазға арналған тілек</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+<style>
+  :root{
+    --bg:#F6F3EC;
+    --ink:#17150F;
+    --sub:#5A544A;
+    --faint:#948C7E;
+    --line:#E4DED2;
+    --accent:#E4572E;
+    --green:#2F6B4F;
+    --amber:#F2B33D;
+    --card:#FFFFFF;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Manrope','Noto Sans KR',sans-serif;
+    overflow-x:hidden;min-height:100dvh;
+    display:flex;flex-direction:column;
+    -webkit-tap-highlight-color:transparent;
+  }
+  html[data-lang="ko"] body{font-family:'Noto Sans KR','Manrope',sans-serif}
+  body::after{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.04;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.7'/></svg>"); 
+  } 
+  ::selection{background:var(--accent);color:#fff} 
+ 
+  /* ═══ Фондық геометриялық пішіндер ═══ */ 
+  #shapes{position:fixed;inset:0;z-index:0;pointer-events:none;will-change:transform} 
+  .shape{position:absolute;opacity:.5;will-change:transform;animation:drift 9s ease-in-out infinite alternate} 
+  @keyframes drift{from{transform:translateY(-9px) rotate(-3deg)}to{transform:translateY(9px) rotate(4deg)}} 
+  .s1{left:9%;top:21%;animation-duration:10s} 
+  .s2{right:11%;top:17%;animation-duration:12s;animation-delay:-3s} 
+  .s3{left:13%;bottom:17%;animation-duration:11s;animation-delay:-6s} 
+  .s4{right:15%;bottom:23%;animation-duration:9s;animation-delay:-2s} 
+  .s5{right:30%;top:8%;animation-duration:13s;animation-delay:-5s;opacity:.28} 
+  .s6{left:27%;bottom:7%;animation-duration:10s;animation-delay:-4s;opacity:.4} 
+  @media (max-width:640px){.s5,.s6{display:none}.s1{left:6%}.s2{right:6%}} 
+ 
+  #fx{position:fixed;inset:0;z-index:15;pointer-events:none} 
+ 
+  /* ═══ Картa ═══ */ 
+  main{ 
+    position:relative;z-index:10;flex:1;width:100%;max-width:660px;margin:0 auto; 
+    display:flex;flex-direction:column;justify-content:center;align-items:center; 
+    text-align:center;padding:56px 26px 18px; 
+  } 
+  .fade{opacity:0;transform:translateY(18px); 
+    transition:opacity .7s ease, transform .7s cubic-bezier(.22,.8,.3,1)} 
+  .fade.show{opacity:1;transform:none} 
+ 
+  #toName{ 
+    font-weight:800;font-size:.82rem;letter-spacing:.14em;text-transform:uppercase; 
+    color:var(--accent);margin-bottom:10px; 
+  } 
+  #kicker{ 
+    font-weight:700;font-size:.72rem;letter-spacing:.34em;text-transform:uppercase; 
+    color:var(--faint);margin-bottom:18px;padding-left:.34em; 
+  } 
+  #title{ 
+    font-family:'Unbounded','Manrope','Noto Sans KR',sans-serif;font-weight:600; 
+    font-size:clamp(1.85rem,6.6vw,3.1rem);line-height:1.14;min-height:1.2em; 
+    letter-spacing:-.005em; 
+  } 
+  html[data-lang="ko"] #title{font-family:'Noto Sans KR',sans-serif;font-weight:800;letter-spacing:-.02em} 
+  #title .ch{display:inline-block;white-space:pre; 
+    opacity:0;transform:translateY(.5em) rotate(-5deg) scale(.92); 
+    transition:opacity .45s ease, transform .6s cubic-bezier(.2,.9,.25,1.15)} 
+  #title.on .ch{opacity:1;transform:none} 
+ 
+  #underline{margin:14px auto 30px;display:block;overflow:visible} 
+  #ulPath{stroke-dasharray:1;stroke-dashoffset:1} 
+ 
+  #lines{display:flex;flex-direction:column;gap:14px;max-width:50ch;margin-bottom:30px} 
+  #lines .line{font-size:clamp(.98rem,3.2vw,1.08rem);line-height:1.8;color:var(--sub);font-weight:500} 
+ 
+  /* Тілек карточкасы — басты элемент */ 
+  #wish{ 
+    background:var(--card);border:1px solid var(--line);border-radius:24px; 
+    padding:28px 30px;max-width:52ch; 
+    box-shadow:0 20px 48px rgba(23,21,15,.09); 
+    transform:translateY(24px) scale(.97); 
+    transition:opacity .8s ease, transform .8s cubic-bezier(.2,.9,.3,1.08); 
+  } 
+  #wish.show{opacity:1;transform:none} 
+  #wish svg{color:var(--accent);margin-bottom:12px} 
+  #wishTx{font-weight:700;font-size:clamp(1.08rem,3.6vw,1.22rem);line-height:1.75} 
+ 
+  #sign{margin-top:22px;font-size:.9rem;color:var(--faint);font-weight:500} 
+ 
+  /* ═══ Төменгі бөлік ═══ */ 
+  footer{ 
+    position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:14px; 
+    padding:10px 16px 30px; 
+  } 
+  #hint{font-size:.8rem;color:var(--faint);font-weight:500;transition:opacity .6s ease} 
+  #hint.seen{opacity:0 !important} 
+  #langs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center} 
+  #langs button{ 
+    background:var(--card);border:1px solid var(--line);border-radius:999px; 
+    font-family:inherit;font-weight:800;font-size:.74rem;letter-spacing:.1em; 
+    color:var(--faint);padding:8px 16px;cursor:pointer; 
+    transition:all .25s ease; 
+  } 
+  #langs button:hover{border-color:var(--ink);color:var(--ink)} 
+  #langs button.act{background:var(--ink);border-color:var(--ink);color:var(--bg)} 
+ 
+  /* ═══ Жоғарғы оң бұрыштағы батырмалар ═══ */ 
+  #corner{ 
+    position:fixed;top:18px;right:18px;z-index:40;display:flex;gap:8px; 
+    opacity:0;pointer-events:none;transition:opacity .5s ease .3s; 
+  } 
+  html.opened #corner{opacity:1;pointer-events:auto} 
+  #corner button{ 
+    width:44px;height:44px;border-radius:50%;display:grid;place-items:center; 
+    background:var(--card);border:1px solid var(--line);color:var(--ink); 
+    cursor:pointer;transition:all .25s ease; 
+  } 
+  #corner button:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)} 
+  #corner button svg{width:18px;height:18px} 
+ 
+  /* ═══ Кіру қақпасы ═══ */ 
+  #gate{ 
+    position:fixed;inset:0;z-index:30;cursor:pointer; 
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0; 
+    text-align:center;padding:24px; 
+    transition:opacity .7s ease, transform .7s ease; 
+  } 
+  #gate.gone{opacity:0;transform:scale(.97);pointer-events:none} 
+  #gKicker{ 
+    font-weight:800;font-size:.72rem;letter-spacing:.34em;text-transform:uppercase; 
+    color:var(--accent);padding-left:.34em; 
+  } 
+  #gLine{margin-top:14px;font-size:clamp(1rem,3.4vw,1.15rem);color:var(--sub);font-weight:500;max-width:30ch} 
+  #openBtn{ 
+    width:92px;height:92px;border-radius:50%;border:none;cursor:pointer; 
+    background:var(--ink);color:var(--bg);display:grid;place-items:center; 
+    margin:34px 0 18px;position:relative;transition:transform .25s ease; 
+  } 
+  #openBtn:hover{transform:scale(1.07)} 
+  #openBtn svg{width:26px;height:26px} 
+  #openBtn::before,#openBtn::after{ 
+    content:'';position:absolute;inset:-13px;border-radius:50%; 
+    border:1.5px solid rgba(228,87,46,.4);opacity:0; 
+    animation:ripple 2.6s ease-out infinite; 
+  } 
+  #openBtn::after{animation-delay:1.3s} 
+  @keyframes ripple{ 
+    0%{transform:scale(.9);opacity:1} 
+    100%{transform:scale(1.55);opacity:0} 
+  } 
+  #gTap{font-weight:800;font-size:.82rem;letter-spacing:.12em;color:var(--ink)} 
+ 
+  /* ═══ QR модулі ═══ */ 
+  #overlay{ 
+    position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center; 
+    background:rgba(23,21,15,.45);backdrop-filter:blur(4px); 
+    opacity:0;visibility:hidden;transition:opacity .3s ease, visibility .3s; 
+    padding:20px;overflow:auto; 
+  } 
+  #overlay.open{opacity:1;visibility:visible} 
+  .paper{ 
+    position:relative;background:var(--card); 
+    width:min(410px,100%);padding:30px 28px 26px;border-radius:24px; 
+    box-shadow:0 30px 80px rgba(23,21,15,.28); 
+    transform:translateY(16px) scale(.97); 
+    transition:transform .35s cubic-bezier(.2,.9,.3,1.1); 
+  } 
+  #overlay.open .paper{transform:translateY(0) scale(1)} 
+  .paper h2{font-family:'Unbounded','Manrope',sans-serif;font-weight:600;font-size:1.25rem;margin-bottom:8px} 
+  .paper .note{font-size:.88rem;line-height:1.65;color:var(--sub);margin-bottom:18px;font-weight:500} 
+  .paper label{display:block;font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:14px} 
+  .paper input{ 
+    display:block;width:100%;margin-top:6px;padding:11px 14px; 
+    font-family:inherit;font-size:.95rem;font-weight:500;color:var(--ink); 
+    background:var(--bg);border:1px solid var(--line);border-radius:12px;outline:none; 
+    transition:border-color .25s; 
+  } 
+  .paper input:focus{border-color:var(--ink)} 
+  #urlWarn{font-size:.8rem;color:#C2410C;margin:-6px 0 12px;line-height:1.5;font-weight:600} 
+  .qrWrap{ 
+    position:relative;display:flex;align-items:center;justify-content:center; 
+    background:var(--bg);border-radius:16px;padding:16px;margin-bottom:16px;min-height:236px; 
+  } 
+  #qrCanvas{display:block;width:200px;height:200px} 
+  #qrEmpty{position:absolute;font-size:.82rem;color:var(--faint);font-weight:600} 
+  #dlBtn{ 
+    width:100%;display:flex;align-items:center;justify-content:center;gap:8px; 
+    background:var(--accent);color:#fff;border:none;border-radius:14px; 
+    padding:13px;font-family:inherit;font-weight:800;font-size:.95rem; 
+    cursor:pointer;transition:filter .25s; 
+  } 
+  #dlBtn:hover{filter:brightness(1.07)} 
+  #dlBtn:disabled{opacity:.4;cursor:default} 
+  #dlBtn svg{width:16px;height:16px} 
+  #closeModal{ 
+    position:absolute;top:14px;right:14px;background:var(--bg);border:1px solid var(--line); 
+    border-radius:50%;width:34px;height:34px;display:grid;place-items:center;cursor:pointer; 
+    color:var(--sub);transition:all .25s; 
+  } 
+  #closeModal:hover{background:var(--ink);color:var(--bg);border-color:var(--ink)} 
+  #closeModal svg{width:15px;height:15px} 
+ 
+  html.rm .fade,html.rm #title .ch{transition:none} 
+  html.rm .shape,html.rm #openBtn::before,html.rm #openBtn::after{animation:none} 
+</style> 
+</head> 
+<body> 
+ 
+<!-- Фондық пішіндер --> 
+<div id="shapes" aria-hidden="true"> 
+  <svg class="shape s1" width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="19" fill="none" stroke="var(--accent)" stroke-width="3"/></svg> 
+  <svg class="shape s2" width="34" height="34" viewBox="0 0 24 24"><path d="M12 2 V22 M2 12 H22" stroke="var(--green)" stroke-width="3" stroke-linecap="round"/></svg> 
+  <svg class="shape s3" width="62" height="18" viewBox="0 0 62 16"><path d="M3 8 q7 -10 14 0 t14 0 t14 0 t14 0" fill="none" stroke="var(--amber)" stroke-width="3" stroke-linecap="round"/></svg> 
+  <svg class="shape s4" width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="var(--accent)"/></svg> 
+  <svg class="shape s5" width="34" height="30" viewBox="0 0 28 26"><path d="M14 3 L25 23 H3 Z" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/></svg> 
+  <svg class="shape s6" width="30" height="30" viewBox="0 0 30 30"><circle cx="15" cy="15" r="11" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-dasharray="4 6" stroke-linecap="round"/></svg> 
+</div> 
+ 
+<canvas id="fx"></canvas> 
+ 
+<main> 
+  <p id="toName" class="fade"></p> 
+  <p id="kicker" class="fade"></p> 
+  <h1 id="title" aria-live="polite"></h1> 
+  <svg id="underline" viewBox="0 0 200 14" width="180" height="14" aria-hidden="true"> 
+    <path id="ulPath" pathLength="1" d="M4 9 C 40 3, 80 12, 118 7 C 150 3, 176 10, 196 6" 
+          fill="none" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round"/> 
+  </svg> 
+  <div id="lines"></div> 
+  <div id="wish"> 
+    <i data-lucide="sparkles"></i> 
+    <p id="wishTx"></p> 
+  </div> 
+  <p id="sign" class="fade"></p> 
+</main> 
+ 
+<footer> 
+  <p id="hint" class="fade"></p> 
+  <nav id="langs" class="fade" aria-label="Тіл таңдау"> 
+    <button data-l="kk">ҚАЗАҚША</button> 
+    <button data-l="ru">РУССКИЙ</button> 
+    <button data-l="en">ENGLISH</button> 
+    <button data-l="ko">한국어</button> 
+  </nav> 
+</footer> 
+ 
+<div id="corner"> 
+  <button id="muteBtn" title="Музыканы өшіру/қосу"><i data-lucide="volume-2"></i></button> 
+  <button id="qrBtn" title="QR-код жасау"><i data-lucide="qr-code"></i></button> 
+</div> 
+ 
+<!-- Кіру қақпасы --> 
+<div id="gate"> 
+  <p id="gKicker"></p> 
+  <p id="gLine"></p> 
+  <button id="openBtn" aria-label="Ашу"><i data-lucide="arrow-down"></i></button> 
+  <p id="gTap"></p> 
+</div> 
+ 
+<!-- QR-конструктор --> 
+<div id="overlay"> 
+  <div class="paper" role="dialog" aria-modal="true"> 
+    <button id="closeModal" title="Жабу"><i data-lucide="x"></i></button> 
+    <h2>QR-код жасау</h2> 
+    <p class="note">Парақты интернетке орналастырыңыз (Netlify Drop, GitHub Pages — тегін). Сілтемені төменге қойып, QR-кодты жүктеп алыңыз. Сканерлеген адам дәл осы тілекті анимациясымен және музыкасымен көреді.</p> 
+    <label>Парақтың сілтемесі (URL) 
+      <input id="urlInput" type="url" spellcheck="false"> 
+    </label> 
+    <label>Ұстаздың аты (міндетті емес) 
+      <input id="toInput" type="text" placeholder="мысалы: Айгүл апай" maxlength="40"> 
+    </label> 
+    <p id="urlWarn" hidden></p> 
+    <div class="qrWrap"> 
+      <p id="qrEmpty">QR-код осында пайда болады</p> 
+      <canvas id="qrCanvas" hidden></canvas> 
+    </div> 
+    <button id="dlBtn" disabled><i data-lucide="download"></i>PNG жүктеп алу</button> 
+  </div> 
+</div> 
+ 
+<script> 
+/* ══════════ Тілдік деректер — тілек орталықта ══════════ */ 
+const I18N = { 
+  kk:{ 
+    meta:'ҰСТАЗДАР КҮНІ', 
+    title:'Рақмет, ұстазым!', 
+    lines:['Сенім сыйлаған жүректеріңізге тағзым.', 
+           'Әр табысымыздың түбінде — сіздің зейнетіңіз.'], 
+    wish:'Үйіңізге береке, жолыңызға нұр, жүрегіңізге жылу тілейміз. Сіз үйреткен сенім — біздің қанатымыз. Ұстаздар күніңіз құтты болсын!', 
+    sign:'Сыйластықпен, шәкірттеріңіз', 
+    hint:'Экранды түртіңіз — мереке шашырайды', 
+    to:n=>`${n} — сізге`, 
+    gLine:'Сізге арналған жылы тілек бар', gTap:'АШУ' 
+  }, 
+  ru:{ 
+    meta:'ДЕНЬ УЧИТЕЛЯ', 
+    title:'Спасибо, учитель!', 
+    lines:['Низкий поклон сердцу, что дарило нам веру в себя.', 
+           'За каждым нашим успехом — ваш ежедневный труд.'], 
+    wish:'Пусть в вашем доме будет достаток, на пути — свет, а в сердце — тепло. Вера, которую вы нам подарили, ведёт нас вперёд. С Днём учителя!', 
+    sign:'С уважением и любовью, ваши ученики', 
+    hint:'Коснитесь экрана — брызнет конфетти', 
+    to:n=>`${n} — вам`, 
+    gLine:'Здесь вас ждёт тёплое пожелание', gTap:'ОТКРЫТЬ' 
+  }, 
+  en:{ 
+    meta:"TEACHER'S DAY", 
+    title:'Thank you, teacher!', 
+    lines:['A bow to the heart that gave us confidence.', 
+           'Behind every success of ours stands your daily work.'], 
+    wish:'May your home be full of warmth, your path be bright, and your heart be light. The confidence you gave us still carries us forward. Happy Teacher’s Day!', 
+    sign:'With gratitude, your students', 
+    hint:'Tap anywhere for confetti', 
+    to:n=>`For ${n}`, 
+    gLine:'A warm wish awaits you inside', gTap:'OPEN' 
+  }, 
+  ko:{ 
+    meta:'스승의 날', 
+    title:'감사합니다, 선생님!', 
+    lines:['저희에게 자신감을 심어 주신 마음에 깊이 고개를 숙입니다.', 
+           '저희의 모든 성장 뒤에는 선생님의 하루하루가 있습니다.'], 
+    wish:'집에 따뜻함이, 길에 빛이, 마음에 평온이 함께하시길 빕니다. 선생님이 주신 믿음이 저희를 앞으로 나아가게 합니다. 스승의 날 축하합니다!', 
+    sign:'감사한 마음을 담아, 제자들 올림', 
+    hint:'화면을 터치하면 색종이가 흩날립니다', 
+    to:n=>`${n} 선생님께`, 
+    gLine:'따뜻한 축하가 기다리고 있습니다', gTap:'열기' 
+  } 
+}; 
+ 
+const $ = id => document.getElementById(id); 
+const html = document.documentElement; 
+const params = new URLSearchParams(location.search); 
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches; 
+if (RM) html.classList.add('rm'); 
+ 
+const navLang = (navigator.language||'').toLowerCase(); 
+const initial = params.get('lang') && I18N[params.get('lang')] 
+  ? params.get('lang') 
+  : (navLang.startsWith('kk')?'kk':navLang.startsWith('ru')?'ru':navLang.startsWith('ko')?'ko':navLang.startsWith('en')?'en':'kk'); 
+let lang = initial; 
+const toName = params.get('to') || ''; 
+ 
+/* ══════════ Анимациялық тіркелгі ══════════ */ 
+const titleEl=$('title'), linesEl=$('lines'), wishEl=$('wish'), wishTx=$('wishTx'), 
+      toNameEl=$('toName'), kickerEl=$('kicker'), signEl=$('sign'), 
+      hintEl=$('hint'), langsNav=$('langs'), ulPath=$('ulPath'); 
+ 
+function restartTitle(text, base, step){ 
+  titleEl.classList.remove('on'); titleEl.innerHTML=''; 
+  [...text].forEach((ch,i)=>{ 
+    const s=document.createElement('span'); 
+    s.className='ch'; s.textContent=ch; 
+    s.style.transitionDelay=(base+i*step)+'ms'; 
+    titleEl.appendChild(s); 
+  }); 
+  void titleEl.offsetWidth; 
+  titleEl.classList.add('on'); 
+} 
+function drawUnderline(delay){ 
+  ulPath.style.transition='none'; 
+  ulPath.style.strokeDashoffset=1; 
+  void ulPath.getBoundingClientRect(); 
+  ulPath.style.transition=`stroke-dashoffset .9s cubic-bezier(.6,0,.3,1) ${delay}ms`; 
+  ulPath.style.strokeDashoffset=0; 
+} 
+function applyLang(code, intro){ 
+  const d=I18N[code]; 
+  html.dataset.lang=code; 
+  toNameEl.textContent = toName ? d.to(toName) : ''; 
+  toNameEl.style.display = toName ? '' : 'none'; 
+  kickerEl.textContent=d.meta; 
+  wishTx.textContent=d.wish; 
+  signEl.textContent=d.sign; 
+  hintEl.textContent=d.hint; 
+  linesEl.innerHTML=''; 
+  d.lines.forEach(t=>{ 
+    const p=document.createElement('p'); p.className='line fade'; p.textContent=t; 
+    linesEl.appendChild(p); 
+  }); 
+  const K = intro ? 1 : .55; 
+  const base = intro ? 350 : 60; 
+  const T = ms => base + Math.round(ms*K); 
+  restartTitle(d.title, T(120), Math.round(30*K)||0); 
+  drawUnderline(T(120 + d.title.length*30 + 350)); 
+  const lineD = T(1050); 
+  const seq=[[toNameEl,T(0)],[kickerEl,T(80)],[langsNav,T(300)]]; 
+  d.lines.forEach((_,i)=>seq.push([linesEl.children[i], lineD+i*350])); 
+  const wishD = lineD + d.lines.length*350 + 100; 
+  seq.push([wishEl, wishD]); 
+  seq.push([signEl, wishD+380]); 
+  seq.push([hintEl, wishD+650]); 
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ 
+    seq.forEach(([el,dl])=>{ el.style.transitionDelay=dl+'ms'; el.classList.add('show'); }); 
+  })); 
+} 
+function hideAll(){ 
+  [toNameEl,kickerEl,...linesEl.children,wishEl,signEl,hintEl,langsNav] 
+    .forEach(el=>{ el.style.transitionDelay='0ms'; el.classList.remove('show'); }); 
+} 
+function setLang(code){ 
+  if(code===lang || !started) return; 
+  lang=code; updateTabs(); chime(); 
+  hideAll(); 
+  setTimeout(()=>applyLang(code,false), 340); 
+} 
+const tabs=[...document.querySelectorAll('#langs button')]; 
+function updateTabs(){ tabs.forEach(b=>b.classList.toggle('act', b.dataset.l===lang)); } 
+tabs.forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.l))); 
+updateTabs(); 
+ 
+/* Кіру қақпасының мәтіні */ 
+(function(){ 
+  const d=I18N[initial]; 
+  $('gKicker').textContent=d.meta; 
+  $('gLine').textContent=d.gLine; 
+  $('gTap').textContent=d.gTap; 
+})(); 
+ 
+/* ══════════ Музыка: тыныс эмбиент-пианино — Web Audio ══════════ */ 
+const TEMPO=64, BEAT=60/TEMPO, LOOP=32;   /* 4/4, 8 такт */ 
+function f(name){ 
+  const m=name.match(/^([A-G])(#|b)?(\d)$/); 
+  const base={C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]] + (m[2]==='#'?1:m[2]==='b'?-1:0); 
+  return 440*Math.pow(2,((+m[3]+1)*12+base-69)/12); 
+} 
+const MEL=[ 
+ [0,0,'A4',2],[0,2,'C5',1],[0,3,'E5',1], 
+ [1,0,'D5',1.5],[1,1.5,'C5',1.5],[1,3,'A4',1], 
+ [2,0,'G4',2],[2,2,'A4',2], 
+ [3,0,'C5',3], 
+ [4,0,'E5',2],[4,2,'D5',1],[4,3,'C5',1], 
+ [5,0,'D5',2],[5,2,'A4',2], 
+ [6,0,'B4',2],[6,2,'C5',1],[6,3,'D5',1], 
+ [7,0,'C5',4] 
+]; 
+const CH={ A:['A2','E3','C4'], F:['F2','C3','A3'], C:['C3','G3','E4'], G:['G2','D3','B3'] }; 
+const PROG=['A','F','C','G','A','F','C','G']; 
+ 
+let AC=null, master=null, muted=false, musicOn=false; 
+let evList=[], evIdx=0, loopStart=0, schedTimer=null; 
+ 
+function initAudio(){ 
+  if(AC) return; 
+  AC = new (window.AudioContext||window.webkitAudioContext)(); 
+  master = AC.createGain(); 
+  master.gain.value = muted?0:.78; 
+  const shelf=AC.createBiquadFilter(); 
+  shelf.type='highshelf'; shelf.frequency.value=7000; shelf.gain.value=-5; 
+  const conv=AC.createConvolver(); 
+  const dur=2.8, len=AC.sampleRate*dur, buf=AC.createBuffer(2,len,AC.sampleRate); 
+  for(let c=0;c<2;c++){ const d=buf.getChannelData(c); 
+    for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.4); } 
+  conv.buffer=buf; 
+  const wet=AC.createGain(); wet.gain.value=.3; 
+  master.connect(shelf); shelf.connect(AC.destination); 
+  master.connect(wet); wet.connect(conv); conv.connect(AC.destination); 
+} 
+function voice(fr,t,vol,decay,partials){ 
+  const g=AC.createGain(); 
+  g.gain.setValueAtTime(0,t); 
+  g.gain.linearRampToValueAtTime(vol,t+.007); 
+  g.gain.exponentialRampToValueAtTime(.0001,t+decay); 
+  partials.forEach(([mult,amp])=>{ 
+    const o=AC.createOscillator(); o.type='sine'; o.frequency.value=fr*mult; 
+    const og=AC.createGain(); og.gain.value=amp; 
+    o.connect(og); og.connect(g); o.start(t); o.stop(t+decay+.1); 
+  }); 
+  g.connect(master); 
+} 
+const key =(fr,t,dur,vol)=>voice(fr,t,vol,Math.min(3.4,Math.max(1.6,dur*1.5)),[[1,1],[2,.2],[4,.05]]); 
+const plk =(fr,t,vol)=>voice(fr,t,vol,1.2,[[1,1],[2.001,.12]]); 
+const bass=(fr,t,vol)=>voice(fr,t,vol,2.4,[[1,1],[2,.3]]); 
+function pad(t,notes,dur){ 
+  notes.forEach(n=>{ 
+    const fr=f(n); 
+    [-6,6].forEach(det=>{ 
+      const o=AC.createOscillator(); o.type='sawtooth'; o.frequency.value=fr; o.detune.value=det; 
+      const lp=AC.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=680; lp.Q.value=.4; 
+      const g=AC.createGain(); 
+      g.gain.setValueAtTime(0,t); 
+      g.gain.linearRampToValueAtTime(.035,t+.5); 
+      g.gain.setValueAtTime(.035,t+dur-.65); 
+      g.gain.linearRampToValueAtTime(0,t+dur); 
+      o.connect(lp); lp.connect(g); g.connect(master); 
+      o.start(t); o.stop(t+dur+.1); 
+    }); 
+  }); 
+} 
+function buildEvents(){ 
+  evList=[]; 
+  MEL.forEach(([b,bo,n,d])=>evList.push({beat:b*4+bo,n,d,m:1})); 
+  for(let b=0;b<8;b++){ 
+    const c=CH[PROG[b]]; 
+    evList.push({beat:b*4,   n:c[0], v:.24, bass:1}); 
+    evList.push({beat:b*4,   pad:[c[1],c[2]], dur:4}); 
+    evList.push({beat:b*4+1, n:c[2], v:.075}); 
+    evList.push({beat:b*4+3, n:c[1], v:.06}); 
+  } 
+  evList.sort((a,b)=>a.beat-b.beat); 
+} 
+function playEv(e,t){ 
+  if(e.m) key(f(e.n), t, e.d*BEAT, .24); 
+  else if(e.pad) pad(t, e.pad, e.dur*BEAT); 
+  else if(e.bass) bass(f(e.n), t, e.v); 
+  else plk(f(e.n), t, e.v); 
+} 
+function schedule(){ 
+  if(!musicOn) return; 
+  const horizon=AC.currentTime+.5; 
+  let guard=0; 
+  while(guard++<300){ 
+    const e=evList[evIdx], t=loopStart+e.beat*BEAT; 
+    if(t>horizon) break; 
+    evIdx++; 
+    if(evIdx>=evList.length){ evIdx=0; loopStart+=LOOP*BEAT; } 
+    if(t<AC.currentTime-.1) continue; 
+    playEv(e, Math.max(t, AC.currentTime+.02)); 
+  } 
+} 
+function startMusic(){ 
+  if(!AC) return; 
+  buildEvents(); 
+  loopStart=AC.currentTime+1.2; evIdx=0; musicOn=true; 
+  if(!schedTimer) schedTimer=setInterval(schedule,120); 
+  schedule(); 
+} 
+/* Ашылғандағы жұмсақ глиссандо */ 
+function gliss(){ 
+  ['C4','D4','E4','G4','A4','C5','D5','E5','G5','A5','C6'] 
+    .forEach((n,i)=>key(f(n), AC.currentTime+.05+i*.055, .4, .1)); 
+} 
+const CHIME=['E5','G5','A5','C6','D6']; 
+function chime(){ 
+  if(!AC||muted) return; 
+  key(f(CHIME[Math.floor(Math.random()*CHIME.length)]), AC.currentTime+.01, .5, .13); 
+} 
+document.addEventListener('visibilitychange',()=>{ 
+  if(!AC) return; 
+  document.hidden ? AC.suspend() : AC.resume(); 
+}); 
+ 
+/* ══════════ Ашу ══════════ */ 
+let started=false; 
+const gate=$('gate'); 
+gate.addEventListener('click',()=>{ 
+  if(started) return; started=true; 
+  initAudio(); AC.resume && AC.resume(); 
+  gliss(); startMusic(); 
+  gate.classList.add('gone'); 
+  html.classList.add('opened'); 
+  applyLang(lang,true); 
+  setTimeout(()=>gate.remove(),800); 
+  setTimeout(()=>pop(innerWidth/2,innerHeight*.3, RM?18:70, 6.5),350); 
+  setTimeout(()=>{pop(innerWidth*.18,innerHeight*.42, RM?8:26, 5); 
+                  pop(innerWidth*.82,innerHeight*.42, RM?8:26, 5);},950); 
+}); 
+ 
+/* Дыбыс өшіру */ 
+ $('muteBtn').addEventListener('click',()=>{ 
+  muted=!muted; 
+  if(AC){ 
+    master.gain.cancelScheduledValues(AC.currentTime); 
+    master.gain.linearRampToValueAtTime(muted?0:.78, AC.currentTime+.3); 
+  } 
+  $('muteBtn').innerHTML=`<i data-lucide="${muted?'volume-x':'volume-2'}"></i>`; 
+  if(window.lucide) lucide.createIcons(); 
+}); 
+ 
+/* ══════════ Конфетти — canvas ══════════ */ 
+const cv=$('fx'), ctx=cv.getContext('2d'); 
+let W,H, pieces=[]; 
+const COLORS=['#E4572E','#F2B33D','#2F6B4F','#17150F']; 
+function resize(){ 
+  const dpr=Math.min(2,devicePixelRatio||1); 
+  W=innerWidth; H=innerHeight; 
+  cv.width=W*dpr; cv.height=H*dpr; 
+  ctx.setTransform(dpr,0,0,dpr,0,0); 
+} 
+addEventListener('resize',resize); resize(); 
+ 
+function pop(x,y,n,power){ 
+  for(let i=0;i<n;i++){ 
+    const a=Math.random()*6.283, s=(.6+Math.random())*(power||4.5); 
+    pieces.push({ 
+      x,y, vx:Math.cos(a)*s, vy:Math.sin(a)*s-2.2, 
+      rot:Math.random()*6.283, vr:(Math.random()-.5)*.3, 
+      shape:Math.floor(Math.random()*3), 
+      size:5+Math.random()*6, 
+      color:COLORS[Math.floor(Math.random()*COLORS.length)], 
+      life:1, decay:.007+Math.random()*.008 
+    }); 
+  } 
+} 
+(function tick(){ 
+  ctx.clearRect(0,0,W,H); 
+  for(let i=pieces.length-1;i>=0;i--){ 
+    const p=pieces[i]; 
+    p.vx*=.985; p.vy=p.vy*.985+.085; 
+    p.x+=p.vx; p.y+=p.vy; p.rot+=p.vr; p.life-=p.decay; 
+    if(p.life<=0 || p.y>H+30){ pieces.splice(i,1); continue; } 
+    ctx.save(); 
+    ctx.translate(p.x,p.y); ctx.rotate(p.rot); 
+    ctx.globalAlpha=Math.min(1,p.life*1.4); 
+    ctx.fillStyle=p.color; 
+    const s=p.size; 
+    if(p.shape===0) ctx.fillRect(-s/2,-s*.35,s,s*.7); 
+    else if(p.shape===1){ ctx.beginPath(); ctx.arc(0,0,s*.42,0,6.283); ctx.fill(); } 
+    else { ctx.beginPath(); ctx.moveTo(0,-s/2); ctx.lineTo(s/2,s/2); ctx.lineTo(-s/2,s/2); ctx.closePath(); ctx.fill(); } 
+    ctx.restore(); 
+  } 
+  requestAnimationFrame(tick); 
+})(); 
+ 
+/* Түрту → конфетти + қоңырау */ 
+addEventListener('pointerdown',e=>{ 
+  if(!started) return; 
+  if(e.target.closest('#corner,#overlay,#langs,.paper,#gate')) return; 
+  pop(e.clientX,e.clientY, RM?8:24, 4.2); 
+  chime(); 
+  hintEl.classList.add('seen'); 
+}); 
+ 
+/* Пішіндерге жұмсақ параллакс */ 
+const shapesEl=$('shapes'); 
+let sx=0,sy=0,tx=0,ty=0; 
+addEventListener('pointermove',e=>{ 
+  tx=(e.clientX/innerWidth-.5)*-14; 
+  ty=(e.clientY/innerHeight-.5)*-10; 
+}); 
+(function parallax(){ 
+  if(!RM){ sx+=(tx-sx)*.05; sy+=(ty-sy)*.05; 
+    shapesEl.style.transform=`translate3d(${sx}px,${sy}px,0)`; } 
+  requestAnimationFrame(parallax); 
+})(); 
+ 
+/* ══════════ QR-конструктор ══════════ */ 
+const overlay=$('overlay'), urlInput=$('urlInput'), toInput=$('toInput'), 
+      urlWarn=$('urlWarn'), qrCanvas=$('qrCanvas'), qrEmpty=$('qrEmpty'), dlBtn=$('dlBtn'); 
+let hasQR=false, dT; 
+ 
+function buildUrl(){ 
+  try{ 
+    const u=new URL(location.href); 
+    const name=toInput.value.trim(); 
+    if(name) u.searchParams.set('to',name); else u.searchParams.delete('to'); 
+    return u.toString(); 
+  }catch(_){ return location.href; } 
+} 
+function validate(u){ 
+  if(u.startsWith('file:')) return 'Бұл әзірге жергілікті файл. Парақты интернетке орналастырған соң QR жұмыс істейді.'; 
+  if(!/^https?:\/\//i.test(u)) return 'Сілтеме http:// немесе https:// арқылы басталуы керек.'; 
+  return ''; 
+} 
+function genQR(){ 
+  const u=urlInput.value.trim()||buildUrl(); 
+  const warn=validate(u); 
+  urlWarn.textContent=warn; urlWarn.hidden=!warn; 
+  if(typeof QRCode==='undefined'){ 
+    qrEmpty.hidden=false; qrEmpty.textContent='QR кітапханасы жүктелмеді — интернетті тексеріңіз.'; 
+    qrCanvas.hidden=true; hasQR=false; dlBtn.disabled=true; return; 
+  } 
+  QRCode.toCanvas(qrCanvas,u,{width:520,margin:2,errorCorrectionLevel:'M', 
+    color:{dark:'#17150F',light:'#F6F3EC'}},err=>{ 
+    if(err){ console.warn(err); return; } 
+    qrCanvas.hidden=false; qrEmpty.hidden=true; hasQR=true; dlBtn.disabled=false; 
+  }); 
+} 
+function scheduleGen(){ clearTimeout(dT); dT=setTimeout(genQR,350); } 
+urlInput.addEventListener('input',scheduleGen); 
+toInput.addEventListener('input',()=>{ urlInput.value=buildUrl(); scheduleGen(); }); 
+ 
+function openModal(){ 
+  toInput.value=toName; 
+  urlInput.value=buildUrl(); 
+  overlay.classList.add('open'); 
+  genQR(); 
+} 
+function closeModal(){ overlay.classList.remove('open'); } 
+ $('qrBtn').addEventListener('click',openModal); 
+ $('closeModal').addEventListener('click',closeModal); 
+overlay.addEventListener('click',e=>{ if(e.target===overlay) closeModal(); }); 
+addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); }); 
+ 
+dlBtn.addEventListener('click',()=>{ 
+  if(!hasQR) return; 
+  qrCanvas.toBlob(b=>{ 
+    const a=document.createElement('a'); 
+    a.href=URL.createObjectURL(b); 
+    a.download='ustaz-kuni-qr.png'; 
+    a.click(); 
+    URL.revokeObjectURL(a.href); 
+  }); 
+}); 
+ 
+if(window.lucide) lucide.createIcons(); 
+</script> 
+</body> 
+</html>
